@@ -2,95 +2,118 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>矿场数据校验工具</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#ffffff;--bg2:#f7f7f5;--bg3:#f0efe9;
+  --bg:#fff;--bg2:#f7f7f5;--bg3:#f0efe9;
   --text:#1a1a18;--text2:#5f5e5a;--text3:#9c9a92;
   --border:#e2e0d8;--border2:#d0cec6;
   --green-bg:#eaf3de;--green:#3b6d11;
   --red-bg:#fcebeb;--red:#a32d2d;
   --amber-bg:#faeeda;--amber:#854f0b;
   --blue-bg:#e6f1fb;--blue:#185fa5;
-  --radius:8px;--radius-lg:12px;
+  --r:8px;--rl:12px;
 }
-body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg3);color:var(--text);font-size:13px;line-height:1.55;min-height:100vh}
-.app{max-width:1140px;margin:0 auto;padding:24px 16px 48px}
-.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.nav-left{display:flex;align-items:center;gap:10px}
-.nav-title{font-size:16px;font-weight:500}
-.nav-sub{font-size:11px;color:var(--text3);background:var(--bg2);padding:2px 8px;border-radius:4px;border:0.5px solid var(--border)}
-.nav-tabs{display:flex;gap:4px;background:var(--bg2);padding:3px;border-radius:8px;border:0.5px solid var(--border)}
-.nav-tab{padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text2);border:none;background:transparent;transition:background .15s}
+body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg3);color:var(--text);font-size:13px;line-height:1.5;min-height:100vh}
+.app{max-width:1120px;margin:0 auto;padding:20px 14px 48px}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.nav-left{display:flex;align-items:center;gap:8px}
+.nav-title{font-size:15px;font-weight:500}
+.nav-sub{font-size:11px;color:var(--text3);background:var(--bg2);padding:2px 7px;border-radius:4px;border:.5px solid var(--border)}
+.nav-tabs{display:flex;gap:3px;background:var(--bg2);padding:3px;border-radius:8px;border:.5px solid var(--border)}
+.nav-tab{padding:5px 13px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text2);border:none;background:transparent}
 .nav-tab.active{background:var(--bg);color:var(--text);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.card{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:20px;margin-bottom:14px}
-.card-title{font-size:13px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:7px;color:var(--text)}
-.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:32px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+.card{background:var(--bg);border-radius:var(--rl);border:.5px solid var(--border);padding:18px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:600;margin-bottom:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--rl);padding:28px 20px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s,background .2s}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--blue);background:var(--blue-bg)}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.upload-icon{font-size:28px;margin-bottom:8px}
 .upload-title{font-size:14px;font-weight:500;margin-bottom:3px}
-.upload-sub{font-size:12px;color:var(--text3)}
-.file-selected{display:flex;align-items:center;gap:10px;background:var(--green-bg);border-radius:var(--radius);padding:9px 14px;margin-top:10px;text-align:left}
+.upload-sub{font-size:11px;color:var(--text3)}
+.file-ok{display:flex;align-items:center;gap:8px;background:var(--green-bg);border-radius:var(--r);padding:8px 12px;margin-top:10px}
 .file-name{font-size:12px;font-weight:500;color:var(--green);flex:1}
-.ctrl-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:14px}
-@media(max-width:700px){.ctrl-grid{grid-template-columns:1fr 1fr}}
-.ctrl-group label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500}
-.ctrl-group .hint{font-size:10px;color:var(--text3);margin-top:3px}
-select,input[type=date],input[type=text]{width:100%;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:12px;appearance:none;-webkit-appearance:none}
-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239c9a92'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:28px}
-.date-range{display:flex;align-items:center;gap:6px}
-.date-range span{font-size:11px;color:var(--text3);flex-shrink:0}
-.date-range input{flex:1}
-.btn{padding:7px 18px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;cursor:pointer;white-space:nowrap;font-weight:500;transition:opacity .15s}
+.ctrl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+@media(max-width:640px){.ctrl-grid{grid-template-columns:1fr 1fr}}
+.date-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+label.lbl{display:block;font-size:11px;color:var(--text2);margin-bottom:3px;font-weight:500}
+select,input[type=date]{width:100%;padding:6px 10px;border:.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:12px;appearance:none;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239c9a92'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px}
+.hint{font-size:10px;color:var(--text3);margin-top:2px}
+.quick-btns{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.btn{padding:6px 14px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);font-size:12px;cursor:pointer;white-space:nowrap;font-weight:500}
 .btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}
-.btn-primary:hover{opacity:.85}
-.btn:hover{background:var(--bg2)}
-.btn:disabled{opacity:.38;cursor:not-allowed}
-.btn-sm{padding:4px 10px;font-size:11px}
-.btn-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
-.status-msg{font-size:12px;color:var(--text3)}
-.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px}
-.metric{background:var(--bg2);border-radius:var(--radius);padding:13px 12px;text-align:center}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-row{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.status{font-size:11px;color:var(--text3)}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;margin-bottom:12px}
+.metric{background:var(--bg2);border-radius:var(--r);padding:11px 10px;text-align:center}
 .metric.green{background:var(--green-bg)}.metric.red{background:var(--red-bg)}.metric.amber{background:var(--amber-bg)}
-.metric-label{font-size:10px;color:var(--text2);margin-bottom:3px}
-.metric.green .metric-label{color:var(--green)}.metric.red .metric-label{color:var(--red)}.metric.amber .metric-label{color:var(--amber)}
-.metric-val{font-size:22px;font-weight:500}
+.metric-lbl{font-size:10px;color:var(--text2);margin-bottom:2px}
+.metric.green .metric-lbl{color:var(--green)}.metric.red .metric-lbl{color:var(--red)}.metric.amber .metric-lbl{color:var(--amber)}
+.metric-val{font-size:20px;font-weight:500}
 .metric.green .metric-val{color:var(--green)}.metric.red .metric-val{color:var(--red)}.metric.amber .metric-val{color:var(--amber)}
-.tabs{display:flex;border-bottom:0.5px solid var(--border);margin-bottom:14px}
-.tab{padding:7px 16px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);background:none;border-top:none;border-left:none;border-right:none}
+.tabs{display:flex;border-bottom:.5px solid var(--border);margin-bottom:12px}
+.tab{padding:6px 14px;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);background:none;border-top:none;border-left:none;border-right:none}
 .tab.active{border-bottom-color:var(--text);color:var(--text);font-weight:500}
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
-th{background:var(--bg2);color:var(--text2);font-weight:500;padding:8px 10px;text-align:left;border-bottom:0.5px solid var(--border);white-space:nowrap}
-td{padding:7px 10px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
+th{background:var(--bg2);color:var(--text2);font-weight:500;padding:7px 9px;text-align:left;border-bottom:.5px solid var(--border);white-space:nowrap}
+td{padding:6px 9px;border-bottom:.5px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2)}
-.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:1px 6px;border-radius:3px}
 .ok{background:var(--green-bg);color:var(--green)}.err{background:var(--red-bg);color:var(--red)}
 .tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;margin:1px 2px 1px 0;background:var(--red-bg);color:var(--red)}
-.prog-wrap{display:flex;align-items:center;gap:8px}
-.prog{flex:1;height:4px;background:var(--border);border-radius:2px;min-width:60px}
-.prog-bar{height:4px;border-radius:2px}
-.hist-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:8px;cursor:pointer;transition:background .15s}
-.hist-item:hover{background:var(--bg2)}
+.prog-wrap{display:flex;align-items:center;gap:7px}
+.prog{flex:1;height:3px;background:var(--border);border-radius:2px;min-width:50px}
+.prog-bar{height:3px;border-radius:2px}
+.acc-group{border:.5px solid var(--border);border-radius:var(--r);margin-bottom:6px;overflow:hidden}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;background:var(--bg);gap:8px}
+.acc-head:hover{background:var(--bg2)}
+.acc-left{display:flex;align-items:center;gap:8px;flex:1}
+.acc-rid{font-size:11px;font-weight:600;color:var(--text3);min-width:24px}
+.acc-name{font-size:12px;font-weight:500}
+.acc-src{font-size:10px;color:var(--text3)}
+.acc-cnt{font-size:10px;color:var(--red);background:var(--red-bg);padding:1px 7px;border-radius:10px}
+.acc-arr{font-size:10px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.acc-arr.open{transform:rotate(180deg)}
+.acc-body{display:none;border-top:.5px solid var(--border);background:var(--bg2)}
+.acc-body.open{display:block}
+.acc-row{display:flex;align-items:flex-start;gap:8px;padding:6px 12px;border-bottom:.5px solid var(--border);font-size:12px}
+.acc-row:last-child{border-bottom:none}
+.acc-miner{font-weight:500;min-width:96px;flex-shrink:0}
+.acc-site{color:var(--text2);min-width:52px;flex-shrink:0}
+.acc-date{color:var(--text3);min-width:74px;flex-shrink:0;font-size:11px}
+.acc-detail{color:var(--text2);font-size:11px;flex:1}
+.hist-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r);border:.5px solid var(--border);margin-bottom:7px}
+.hist-item:hover{background:var(--bg2);cursor:pointer}
 .hist-date{font-size:12px;font-weight:500;min-width:160px}
 .hist-meta{font-size:11px;color:var(--text2);flex:1}
-.hist-rate{font-size:13px;font-weight:500;min-width:52px;text-align:right}
-.hist-actions{display:flex;gap:6px;flex-shrink:0}
-.empty{text-align:center;padding:40px;color:var(--text3);font-size:13px;line-height:2}
-.page{display:none}.page.active{display:block}
-.rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-@media(max-width:600px){.rule-grid{grid-template-columns:1fr}}
-.rule-item{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;background:var(--bg2);border-radius:6px}
-.rule-id{font-size:11px;font-weight:600;min-width:24px;color:var(--text3);padding-top:1px}
+.hist-rate{font-size:12px;font-weight:500;min-width:46px;text-align:right}
+.hist-acts{display:flex;gap:5px;flex-shrink:0}
+.empty{text-align:center;padding:36px;color:var(--text3);line-height:2}
+.rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+@media(max-width:580px){.rule-grid{grid-template-columns:1fr}}
+.rule-item{display:flex;gap:7px;padding:8px 10px;background:var(--bg2);border-radius:6px}
+.rule-id{font-size:11px;font-weight:600;color:var(--text3);min-width:22px;padding-top:1px}
 .rule-name{font-size:12px;font-weight:500;margin-bottom:2px}
 .rule-desc{font-size:11px;color:var(--text2)}
-.section-head{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
-.date-filter-summary{font-size:11px;color:var(--blue);background:var(--blue-bg);border-radius:4px;padding:3px 8px;display:inline-block;margin-left:8px}
+.page{display:none}.page.active{display:block}
+.sec-head{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.date-pill{font-size:11px;color:var(--blue);background:var(--blue-bg);border-radius:4px;padding:2px 8px;margin-left:6px;font-weight:400}
+.scope-tag{font-size:10px;padding:1px 6px;border-radius:3px;background:var(--bg2);color:var(--text3);margin-left:4px}
+
+.collapse-card{background:var(--bg);border-radius:var(--rl);border:.5px solid var(--border);margin-bottom:12px;overflow:hidden}
+.collapse-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;cursor:pointer;user-select:none}
+.collapse-head:hover{background:var(--bg2)}
+.collapse-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
+.collapse-arr{font-size:11px;color:var(--text3);transition:transform .2s}
+.collapse-arr.open{transform:rotate(180deg)}
+.collapse-body{display:none;border-top:.5px solid var(--border);padding:14px 18px}
+.collapse-body.open{display:block}
 </style>
 </head>
 <body>
@@ -98,127 +121,123 @@ tr:hover td{background:var(--bg2)}
 
 <div class="nav">
   <div class="nav-left">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     <span class="nav-title">矿场数据校验工具</span>
-    <span class="nav-sub">14条规则 · 双表校验</span>
+    <span class="nav-sub">三表联动 · 14条规则</span>
   </div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('check',this)">校验</button>
-    <button class="nav-tab" onclick="showPage('history',this)">历史记录</button>
-    <button class="nav-tab" onclick="showPage('rules',this)">规则说明</button>
+    <button class="nav-tab" onclick="showPage('history',this)">历史</button>
+    <button class="nav-tab" onclick="showPage('rules',this)">规则</button>
   </div>
 </div>
 
 <!-- 校验页 -->
 <div id="page-check" class="page active">
   <div class="card">
-    <div class="card-title">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-      上传 Excel 文件
-    </div>
+    <div class="card-title">上传文件</div>
     <div class="upload-zone" id="dropZone" ondragover="onDrag(event,true)" ondragleave="onDrag(event,false)" ondrop="onDrop(event)">
       <input type="file" accept=".xlsx,.xls" onchange="onFileChange(event)">
-      <div class="upload-icon">📊</div>
+      <div style="font-size:24px;margin-bottom:6px">📊</div>
       <div class="upload-title">点击选择或拖拽 Excel 文件</div>
-      <div class="upload-sub">支持 .xlsx / .xls · 需包含「数据来源」和「场地收益表」两个 Sheet</div>
+      <div class="upload-sub">支持 .xlsx · 需含「每日巡查表」「场地收益表」「收益历史数据汇总」三个 Sheet</div>
     </div>
-    <div id="fileInfo" style="display:none" class="file-selected">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div id="fileInfo" style="display:none" class="file-ok">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3b6d11" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       <span class="file-name" id="fileName"></span>
       <span id="sheetInfo" style="font-size:11px;color:var(--text2)"></span>
     </div>
 
     <div class="ctrl-grid">
-      <div class="ctrl-group">
-        <label>每日巡查表 Sheet</label>
-        <select id="selSheet1"></select>
+      <div>
+        <label class="lbl">每日巡查表 <span class="scope-tag">算力 · 按日期范围</span></label>
+        <select id="selS1"></select>
       </div>
-      <div class="ctrl-group">
-        <label>场地收益表 Sheet</label>
-        <select id="selSheet2"></select>
+      <div>
+        <label class="lbl">场地收益表 <span class="scope-tag">完整校验 · 仅当天</span></label>
+        <select id="selS2"></select>
       </div>
-      <div class="ctrl-group">
-        <label>开始日期</label>
-        <input type="date" id="dateFrom">
-        <div class="hint">留空 = 不限制起始</div>
-      </div>
-      <div class="ctrl-group">
-        <label>结束日期</label>
-        <input type="date" id="dateTo">
-        <div class="hint">留空 = 不限制结束</div>
+      <div>
+        <label class="lbl">收益历史汇总 <span class="scope-tag">A-AJ列 · 按日期范围</span></label>
+        <select id="selS3"><option value="">不校验</option></select>
       </div>
     </div>
 
-    <!-- 快捷日期 -->
-    <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center">
-      <span style="font-size:11px;color:var(--text3)">快捷选择：</span>
-      <button class="btn btn-sm" onclick="setQuick(0,0)">今天</button>
-      <button class="btn btn-sm" onclick="setQuick(6,0)">近7天</button>
-      <button class="btn btn-sm" onclick="setQuick(29,0)">近30天</button>
+    <div class="date-grid">
+      <div>
+        <label class="lbl">开始日期</label>
+        <input type="date" id="dateFrom">
+        <div class="hint">历史汇总 & 巡查表使用</div>
+      </div>
+      <div>
+        <label class="lbl">结束日期</label>
+        <input type="date" id="dateTo">
+        <div class="hint">场地收益表固定取今天</div>
+      </div>
+    </div>
+
+    <div class="quick-btns">
+      <span style="font-size:11px;color:var(--text3)">快捷：</span>
+      <button class="btn btn-sm" onclick="setQ(0,0)">今天</button>
+      <button class="btn btn-sm" onclick="setQ(6,0)">近7天</button>
+      <button class="btn btn-sm" onclick="setQ(29,0)">近30天</button>
       <button class="btn btn-sm" onclick="setWeek()">本周</button>
       <button class="btn btn-sm" onclick="setMonth()">本月</button>
-      <button class="btn btn-sm" onclick="clearDates()">全部</button>
+      <button class="btn btn-sm" onclick="clrDates()">全部</button>
     </div>
-
     <div class="btn-row">
       <button class="btn btn-primary" id="btnRun" onclick="runCheck()" disabled>开始校验</button>
       <button class="btn" id="btnExport" onclick="exportExcel()" style="display:none">⬇ 导出 Excel</button>
-      <button class="btn" onclick="loadDemo()">载入演示数据</button>
-      <span class="status-msg" id="statusMsg"></span>
+      <span class="status" id="statusMsg"></span>
     </div>
   </div>
-
   <div id="reportArea"></div>
 </div>
 
-<!-- 历史记录页 -->
+<!-- 历史页 -->
 <div id="page-history" class="page">
   <div class="card">
-    <div class="card-title">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      历史校验记录
-      <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:4px">· 最多保存30条 · 存储在本地浏览器</span>
-    </div>
+    <div class="card-title">历史校验记录 <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text3)">· 本地浏览器 · 最多30条</span></div>
     <div id="histList"></div>
   </div>
 </div>
 
-<!-- 规则说明页 -->
+<!-- 规则页 -->
 <div id="page-rules" class="page">
   <div class="card">
-    <div class="section-head" style="margin-bottom:10px">每日巡查表 · 算力校验（R1–R6）</div>
+    <div class="sec-head" style="margin-bottom:10px">每日巡查表 · 算力校验（R1–R5）· 按日期范围</div>
     <div class="rule-grid">
-      <div class="rule-item"><span class="rule-id">R1</span><div><div class="rule-name">架上数量守恒</div><div class="rule-desc">架上数量 = 持有机器数 − 总故障数，容差 ±0</div></div></div>
+      <div class="rule-item"><span class="rule-id">R1</span><div><div class="rule-name">架上数量守恒</div><div class="rule-desc">架上数量 = 持有机器数 − 故障数（总故障数为空则用前一日故障数，都空视为0），容差 ±0</div></div></div>
       <div class="rule-item"><span class="rule-id">R2</span><div><div class="rule-name">总和24h算力加法</div><div class="rule-desc">总和24h = 主24h + 副24h，容差 ±0.15P</div></div></div>
       <div class="rule-item"><span class="rule-id">R3</span><div><div class="rule-name">实时算力加法</div><div class="rule-desc">总和实时 = 主实时 + 副实时，容差 ±0.15P</div></div></div>
       <div class="rule-item"><span class="rule-id">R4</span><div><div class="rule-name">架上理论算力公式</div><div class="rule-desc">架上理论 = 理论总算力 / 持有数 × 架上数，容差 ±0.5P</div></div></div>
-      <div class="rule-item"><span class="rule-id">R5</span><div><div class="rule-name">24h有效率计算</div><div class="rule-desc">有效率 = 总和24h ÷ 架上理论算力，容差 ±0.5%</div></div></div>
-      <div class="rule-item"><span class="rule-id">R6</span><div><div class="rule-name">故障数未填预警</div><div class="rule-desc">总故障数不能为空，否则触发预警</div></div></div>
+      <div class="rule-item"><span class="rule-id">R5</span><div><div class="rule-name">24h有效率计算</div><div class="rule-desc">有效率 = 总和24h ÷ 架上理论算力，容差 ±0.5%；总和24h为0时用「24h平均算力（P）」代替（历史数据fallback）</div></div></div>
     </div>
   </div>
   <div class="card">
-    <div class="section-head" style="margin-bottom:10px">场地收益表 · 收益成本校验（R7–R14）</div>
+    <div class="sec-head" style="margin-bottom:4px">场地收益表 · 完整校验（R7–R14）· 仅当天</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">AMIDN系列只校验 R7/R10/R13；收益历史汇总只校验 R7–R13（跳过 AK 列后的字段）</div>
     <div class="rule-grid">
-      <div class="rule-item"><span class="rule-id">R7</span><div><div class="rule-name">每E算力收入换算</div><div class="rule-desc">E/USD = E/BTC × 今日币价，容差 ±1%</div></div></div>
-      <div class="rule-item"><span class="rule-id">R8</span><div><div class="rule-name">预估用电量</div><div class="rule-desc">用电量(万KWH) = P × 功耗比(W/T) × 24 ÷ 10000，容差 ±1%</div></div></div>
+      <div class="rule-item"><span class="rule-id">R7</span><div><div class="rule-name">E/USD换算</div><div class="rule-desc">E/USD = E/BTC × 今日币价，容差 ±1%</div></div></div>
+      <div class="rule-item"><span class="rule-id">R8</span><div><div class="rule-name">预估用电量</div><div class="rule-desc">用电量(万KWH) = ns实际算力(P) × 功耗比(W/T) × 24 ÷ 10000，保留2位，容差 ±1%</div></div></div>
       <div class="rule-item"><span class="rule-id">R9</span><div><div class="rule-name">线损后功耗比</div><div class="rule-desc">加线损 = 理论功耗比 × 1.09(水冷) / 1.05(风冷)，容差 ±1%</div></div></div>
       <div class="rule-item"><span class="rule-id">R10</span><div><div class="rule-name">ns BTC/USD 收入</div><div class="rule-desc">收入 = E/BTC(USD) × ns实际算力(P) ÷ 1000，容差 ±1%</div></div></div>
-      <div class="rule-item"><span class="rule-id">R11</span><div><div class="rule-name">正常价托管费</div><div class="rule-desc">托管费 = 用电量(万KWH) × 正常价($/KWH) × 10000，容差 ±1%</div></div></div>
-      <div class="rule-item"><span class="rule-id">R12</span><div><div class="rule-name">运维费</div><div class="rule-desc">运维费 = 用电量(万KWH) × 运维单价($/KWH) × 10000，容差 ±1%</div></div></div>
-      <div class="rule-item"><span class="rule-id">R13</span><div><div class="rule-name">毛利（按利润模式）</div><div class="rule-desc">正常价：USD−正常价合计 ｜ 最低价：USD−最低价合计 ｜ 分润模式1：USD×1% ｜ 分润自定义：USD全额 ｜ 代托：跳过</div></div></div>
-      <div class="rule-item"><span class="rule-id">R14</span><div><div class="rule-name">电费占比</div><div class="rule-desc">电费占比 = 正常价合计 ÷ USD收入，容差 ±0.5%</div></div></div>
+      <div class="rule-item"><span class="rule-id">R11</span><div><div class="rule-name">正常价托管费</div><div class="rule-desc">托管费 = 用电量(万KWH) × 正常价($/KWH) × 10000，保留2位，容差 ±1%</div></div></div>
+      <div class="rule-item"><span class="rule-id">R12</span><div><div class="rule-name">运维费</div><div class="rule-desc">运维费 = 用电量(万KWH) × 运维单价($/KWH) × 10000，保留2位，容差 ±1%</div></div></div>
+      <div class="rule-item"><span class="rule-id">R13</span><div><div class="rule-name">毛利（按利润模式）</div><div class="rule-desc">正常价：USD−正常价合计 ｜ 最低价：USD−最低价合计 ｜ 分润模式1：USD×1% ｜ 分润自定义：USD全额 ｜ AMIDN：USD/NS占比 ｜ 代托：跳过</div></div></div>
+      <div class="rule-item"><span class="rule-id">R14</span><div><div class="rule-name">电费占比（仅当天）</div><div class="rule-desc">电费占比 = 正常价合计 ÷ USD收入，容差 ±0.5%（仅场地收益表当天校验，历史汇总不校验）</div></div></div>
+      <div class="rule-item"><span class="rule-id">R15</span><div><div class="rule-name">关机币价（仅当天）</div><div class="rule-desc">关机币价 = 预估电费成本($) ÷ 预估ns BTC产出。电费成本 = 用电量(万KWH)×10000×实际电价，实际电价：按最低价计算取最低价+运维费，其余模式取正常价+运维费，容差 ±1%，仅场地收益表当天校验</div></div></div>
     </div>
   </div>
   <div class="card">
-    <div class="section-head" style="margin-bottom:10px">使用说明</div>
-    <div style="font-size:12px;color:var(--text2);line-height:2.2">
-      <b>1. 准备文件</b>：从 Google Sheets 导出为 .xlsx，需包含「数据来源（或每日巡查表）」和「场地收益表」两个 Sheet。<br>
-      <b>2. 上传文件</b>：点击上传区或拖拽文件，确认 Sheet 名称和日期范围后点「开始校验」。<br>
-      <b>3. 日期筛选</b>：可选择时间范围（如某一周、某一月），或用快捷按钮快速设置，留空表示校验全部数据。<br>
-      <b>4. 查看报告</b>：分场地概览、异常明细、全量明细三部分，鼠标悬停在 ✓/✗ 上查看具体数值。<br>
-      <b>5. 导出</b>：点「导出 Excel」生成4个 Sheet 的校验报告文件。<br>
-      <b>6. 历史记录</b>：每次校验自动保存，点「历史记录」标签随时回溯对比。<br>
-      <b>注意</b>：矿工号为「汇总」的行自动跳过，不纳入校验。
+    <div class="sec-head" style="margin-bottom:8px">跳过规则 & 说明</div>
+    <div style="font-size:12px;color:var(--text2);line-height:2.1">
+      <b>自动跳过：</b>「已经出」场地 · 矿工号含「云算力」· 「汇总」行 · 不在巡查表监控范围内的矿工号<br>
+      <b>故障数：</b>总故障数为空时用前一日故障数代替，都空视为0，不报异常<br>
+      <b>AMIDN系列：</b>分润模式，只校验 R7/R10/R13（收益），不校验成本；毛利 = USD收入 / NS占比<br>
+      <b>历史汇总：</b>只校验 A–AJ 列（R7–R13），AK列后字段错配跳过，不含R14/R15<br>
+      <b>场地收益表：</b>固定取当天数据，校验 R7–R15<br>
+      <b>每日巡查表：</b>按日期范围，校验 R1–R5
     </div>
   </div>
 </div>
@@ -226,417 +245,610 @@ tr:hover td{background:var(--bg2)}
 </div>
 <script>
 const $=id=>document.getElementById(id);
+
+// ── 工具函数 ──
 function n(v){
-  if(v==null||v===''||['—','无','#DIV/0!','#NAME?','#REF!','#VALUE!'].includes(String(v).trim())) return null;
-  const f=parseFloat(String(v).replace(/,/g,'').replace(/%/g,'').replace(/\$/g,'').trim());
+  if(v==null||v==='') return null;
+  const s=String(v).trim();
+  if(['—','无','#DIV/0!','#NAME?','#REF!','#VALUE!','#N/A'].includes(s)) return null;
+  const f=parseFloat(s.replace(/,/g,'').replace(/\$/g,''));
   return isNaN(f)?null:f;
 }
-function pct(v){const x=n(v);return x===null?null:String(v).includes('%')?x/100:x;}
-function fmtN(v,d=2){return v!==null?v.toFixed(d):'—';}
-function fmtPct(v){return v!==null?`${(v*100).toFixed(2)}%`:'—';}
-function fmtDate(d){return d?d.toISOString().slice(0,10):'';}
-function today(){return fmtDate(new Date());}
-function daysAgo(n){const d=new Date();d.setDate(d.getDate()-n);return fmtDate(d);}
-
-// 快捷日期
-function setQuick(daysFrom,daysTo){$('dateFrom').value=daysAgo(daysFrom);$('dateTo').value=daysAgo(daysTo);}
-function setWeek(){const d=new Date();const dow=d.getDay()||7;const mon=new Date(d);mon.setDate(d.getDate()-dow+1);$('dateFrom').value=fmtDate(mon);$('dateTo').value=today();}
+function readPct(v){
+  if(v==null||v==='') return null;
+  const s=String(v).trim();
+  if(s.endsWith('%')){const f=parseFloat(s);return isNaN(f)?null:f/100;}
+  const f=n(v);
+  if(f===null) return null;
+  return f>1.5?f/100:f;
+}
+function fN(v,d=2){return v!==null?v.toFixed(d):'—';}
+function fP(v){return v!==null?`${(v*100).toFixed(2)}%`:'—';}
+function today(){return new Date().toISOString().slice(0,10);}
+function dAgo(n){const d=new Date();d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);}
+function setQ(f,t){$('dateFrom').value=dAgo(f);$('dateTo').value=dAgo(t);}
+function setWeek(){const d=new Date(),dow=d.getDay()||7,m=new Date(d);m.setDate(d.getDate()-dow+1);$('dateFrom').value=m.toISOString().slice(0,10);$('dateTo').value=today();}
 function setMonth(){const d=new Date();$('dateFrom').value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;$('dateTo').value=today();}
-function clearDates(){$('dateFrom').value='';$('dateTo').value='';}
+function clrDates(){$('dateFrom').value='';$('dateTo').value='';}
 
-// 日期范围过滤
-function inRange(dateStr){
-  const from=$('dateFrom').value, to=$('dateTo').value;
-  if(!from&&!to) return true;
-  // 标准化日期字符串 2026-6-1 → 2026-06-01
-  const parts=dateStr.replace(/\//g,'-').split('-');
-  if(parts.length<3) return true;
-  const norm=`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
-  if(from&&norm<from) return false;
-  if(to&&norm>to) return false;
+function normDate(s){
+  const p=String(s||'').replace(/\//g,'-').replace(' 00:00:00','').split('-');
+  if(p.length<3) return s;
+  return `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
+}
+function inRange(s){
+  const f=$('dateFrom').value,t=$('dateTo').value;
+  if(!f&&!t) return true;
+  const d=normDate(s);
+  if(f&&d<f) return false;
+  if(t&&d>t) return false;
   return true;
 }
 
+// ── 规则定义 ──
 const RULES={
-  R1:{label:'架上数量守恒',table:'巡查表'},R2:{label:'总和24h算力',table:'巡查表'},
-  R3:{label:'实时算力加法',table:'巡查表'},R4:{label:'架上理论算力',table:'巡查表'},
-  R5:{label:'24h有效率',table:'巡查表'},R6:{label:'故障数预警',table:'巡查表'},
-  R7:{label:'E/USD换算',table:'收益表'},R8:{label:'预估用电量',table:'收益表'},
-  R9:{label:'线损功耗比',table:'收益表'},R10:{label:'ns收入',table:'收益表'},
-  R11:{label:'正常价托管费',table:'收益表'},R12:{label:'运维费',table:'收益表'},
-  R13:{label:'毛利',table:'收益表'},R14:{label:'电费占比',table:'收益表'},
+  R1:{label:'架上数量守恒',src:'巡查表'},
+  R2:{label:'总和24h算力',src:'巡查表'},
+  R3:{label:'实时算力加法',src:'巡查表'},
+  R4:{label:'架上理论算力',src:'巡查表'},
+  R5:{label:'24h有效率',src:'巡查表'},
+  R7:{label:'E/USD换算',src:'收益表'},
+  R8:{label:'预估用电量',src:'收益表'},
+  R9:{label:'线损功耗比',src:'收益表'},
+  R10:{label:'ns BTC/USD收入',src:'收益表'},
+  R11:{label:'正常价托管费',src:'收益表'},
+  R12:{label:'运维费',src:'收益表'},
+  R13:{label:'毛利',src:'收益表'},
+  R14:{label:'电费占比',src:'收益表(当天)'},
+  R15:{label:'关机币价',src:'收益表(当天)'},
 };
 
-let workbook=null,lastReport=null;
+let wb=null,lastRpt=null;
 
+// ── 文件读取 ──
 function onDrag(e,on){e.preventDefault();$('dropZone').classList.toggle('drag',on);}
 function onDrop(e){e.preventDefault();$('dropZone').classList.remove('drag');readFile(e.dataTransfer.files[0]);}
 function onFileChange(e){readFile(e.target.files[0]);}
-
 function readFile(file){
-  if(!file) return;
-  setStatus('读取文件中...');
-  const reader=new FileReader();
-  reader.onload=e=>{
+  if(!file) return; setSt('读取中...');
+  const r=new FileReader();
+  r.onload=e=>{
     try{
-      workbook=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
       $('fileName').textContent=file.name;
       $('fileInfo').style.display='flex';
-      updateSheetSelectors(workbook.SheetNames);
-      $('sheetInfo').textContent=`共 ${workbook.SheetNames.length} 个 Sheet`;
+      updateSels(wb.SheetNames);
+      $('sheetInfo').textContent=`${wb.SheetNames.length} 个 Sheet`;
       $('btnRun').disabled=false;
-      // 自动设置日期为今天
-      if(!$('dateTo').value) $('dateTo').value=today();
-      setStatus('文件读取完成，可选择时间范围后开始校验');
-    }catch(ex){setStatus('读取失败：'+ex.message);}
+      if(!$('dateTo').value)$('dateTo').value=today();
+      setSt('文件读取完成');
+    }catch(ex){setSt('读取失败：'+ex.message);}
   };
-  reader.readAsArrayBuffer(file);
+  r.readAsArrayBuffer(file);
 }
-
-function updateSheetSelectors(names){
-  [$('selSheet1'),$('selSheet2')].forEach(s=>{
+function updateSels(names){
+  [$('selS1'),$('selS2')].forEach(s=>{
     s.innerHTML='';
-    names.forEach(name=>{const o=document.createElement('option');o.value=o.textContent=name;s.appendChild(o);});
+    names.forEach(nm=>{const o=document.createElement('option');o.value=o.textContent=nm;s.appendChild(o);});
   });
-  ['数据来源','每日巡查表','巡查表'].forEach(p=>{if(names.includes(p))$('selSheet1').value=p;});
-  ['场地收益表','收益表'].forEach(p=>{if(names.includes(p))$('selSheet2').value=p;});
+  const s3=$('selS3');
+  s3.innerHTML='<option value="">不校验</option>';
+  names.forEach(nm=>{const o=document.createElement('option');o.value=o.textContent=nm;s3.appendChild(o);});
+  ['数据来源','每日巡查表','巡查表'].forEach(p=>{if(names.includes(p))$('selS1').value=p;});
+  ['场地收益表'].forEach(p=>{if(names.includes(p))$('selS2').value=p;});
+  if(names.includes('收益历史数据汇总'))$('selS3').value='收益历史数据汇总';
+}
+function toRows(sheet){return XLSX.utils.sheet_to_json(sheet,{raw:false,defval:''});}
+
+// ── 活跃矿工号集合（以巡查表为准）──
+function buildActiveMiners(rows){
+  const set=new Set();
+  rows.forEach(row=>{
+    const miner=String(row['矿工号']||'').split('\n')[0].trim();
+    if(!miner||['矿工号','汇总',''].includes(miner)) return;
+    if(String(row['分类']||'').trim()==='已经出') return;
+    if(miner.includes('云算力')) return;
+    const date=normDate(String(row['登记日期']||'').slice(0,10));
+    if(!inRange(date)) return;
+    set.add(miner);
+  });
+  return set;
 }
 
-function sheetToRows(wb,name){
-  const ws=wb.Sheets[name];if(!ws) return[];
-  return XLSX.utils.sheet_to_json(ws,{raw:false,defval:''});
-}
-
-// ── 校验：巡查表 ──
-function validateInspection(rows){
+// ── 校验：每日巡查表（R1–R5）──
+function valIns(rows){
   return rows.reduce((acc,row)=>{
     const miner=String(row['矿工号']||'').split('\n')[0].trim();
-    if(!miner||miner==='矿工号'||miner==='汇总'||miner==='') return acc;
-    const dateStr=String(row['登记日期']||'').slice(0,10);
-    if(!inRange(dateStr)) return acc;
+    if(!miner||['矿工号','汇总',''].includes(miner)) return acc;
+    if(String(row['分类']||'').trim()==='已经出') return acc;
+    if(miner.includes('云算力')) return acc;
+    const date=normDate(String(row['登记日期']||'').slice(0,10));
+    if(!inRange(date)) return acc;
+    const e={},d={};
 
-    const errs={},details={};
-    const machines=n(row['持有机器数']),online=n(row['架上数量']),fault=n(row['总故障数']);
+    const machines=n(row['持有机器数']),online=n(row['架上数量']);
+    const fault=n(row['总故障数']),faultPrev=n(row['前一日故障数']);
+    const faultVal=fault!==null?fault:(faultPrev!==null?faultPrev:0);
+
     const main24=n(row['主 24h平均算力（P）']),sub24=n(row['副 24h平均算力（P）']),tot24=n(row['总和24h平均算力（P）']);
     const rtMain=n(row['主实时算力（P）']),rtSub=n(row['副实时算力（P）']),rtTot=n(row['总和实时算力（P）']);
-    const theoryTot=n(row['理论总算力(P)']),theoryOnline=n(row['架上理论算力(P)']);
+    const thTot=n(row['理论总算力(P)']),thOnline=n(row['架上理论算力(P)']);
     const hash24=n(row['24h平均算力（P）']);
-    const usedTot=tot24!==null?tot24:hash24;
-    const effRaw=String(row['24h平均有效率']||'');
-    const eff=effRaw.includes('%')?n(effRaw)/100:n(effRaw);
+    // 总和24h为空或为0时，用24h平均算力（P）作为fallback（历史数据W列可能缺失）
+    const used=(tot24!==null&&tot24>0)?tot24:hash24;
+    const eff=readPct(row['24h平均有效率']);
 
-    if(machines!==null&&online!==null&&fault!==null){
-      errs.R1=Math.abs((machines-fault)-online)<=0.5;
-      details.R1=`${machines}−${fault}=${machines-fault}，表中${online}`;
+    // R1
+    if(machines!==null&&online!==null){
+      e.R1=Math.abs((machines-faultVal)-online)<=0.5;
+      d.R1=`${machines}−${faultVal}=${machines-faultVal}，表中${online}${fault===null?'（故障数用前日代替）':''}`;
     }
+    // R2
     if(main24!==null&&sub24!==null&&tot24!==null){
-      errs.R2=Math.abs(main24+sub24-tot24)<=0.15;
-      details.R2=`${fmtN(main24)}+${fmtN(sub24)}=${fmtN(main24+sub24)}，表中${fmtN(tot24)}`;
+      e.R2=Math.abs(main24+sub24-tot24)<=0.15;
+      d.R2=`${fN(main24)}+${fN(sub24)}=${fN(main24+sub24)}，表中${fN(tot24)}`;
     }
+    // R3
     if(rtMain!==null&&rtSub!==null&&rtTot!==null){
-      errs.R3=Math.abs(rtMain+rtSub-rtTot)<=0.15;
-      details.R3=`${fmtN(rtMain)}+${fmtN(rtSub)}=${fmtN(rtMain+rtSub)}，表中${fmtN(rtTot)}`;
+      e.R3=Math.abs(rtMain+rtSub-rtTot)<=0.15;
+      d.R3=`${fN(rtMain)}+${fN(rtSub)}=${fN(rtMain+rtSub)}，表中${fN(rtTot)}`;
     }
-    if(theoryTot&&machines&&online!==null&&theoryOnline!==null&&machines>0){
-      const exp=theoryTot/machines*online;
-      errs.R4=Math.abs(exp-theoryOnline)<=0.5;
-      details.R4=`计算${fmtN(exp)}，表中${fmtN(theoryOnline)}`;
+    // R4
+    if(thTot&&machines&&online!==null&&thOnline!==null&&machines>0){
+      const exp=thTot/machines*online;
+      e.R4=Math.abs(exp-thOnline)<=0.5;
+      d.R4=`计算${fN(exp)}，表中${fN(thOnline)}`;
     }
-    if(eff!==null&&theoryOnline&&usedTot!==null&&theoryOnline>0){
-      const comp=usedTot/theoryOnline,diff=Math.abs(comp-eff);
-      errs.R5=diff<=0.006;
-      details.R5=`计算${fmtPct(comp)}，表中${fmtPct(eff)}，差${fmtPct(diff)}`;
+    // R5
+    if(eff!==null&&thOnline&&used!==null&&thOnline>0){
+      const comp=used/thOnline,diff=Math.abs(comp-eff);
+      e.R5=diff<=0.006;
+      d.R5=`计算${fP(comp)}，表中${fP(eff)}，差${fP(diff)}`;
     }
-    errs.R6=fault!==null;
-    details.R6=fault!==null?`故障数=${fault}`:'故障数为空，需填报';
-
-    const errKeys=Object.keys(errs).filter(k=>!errs[k]);
-    acc.push({miner,date:dateStr,site:String(row['场地编号']||''),errs,details,errKeys,totalChecks:Object.keys(errs).length});
+    const errKeys=Object.keys(e).filter(k=>!e[k]);
+    acc.push({miner,date,site:String(row['场地编号']||''),e,d,errKeys,total:Object.keys(e).length});
     return acc;
   },[]);
 }
 
-// ── 校验：收益表 ──
-function validateRevenue(rows){
+// ── 校验：收益表核心（供场地收益表和历史汇总共用）──
+// mode: 'today'=场地收益表当天完整校验; 'hist'=历史汇总仅R7-R13
+function valRevCore(rows, activeMiners, mode){
+  const todayStr=today();
   return rows.reduce((acc,row)=>{
     const miner=String(row['矿工号']||'').split('\n')[0].trim();
-    if(!miner||miner==='矿工号'||miner==='汇总'||miner==='') return acc;
-    const dateStr=String(row['登记日期']||'').slice(0,10);
-    if(!inRange(dateStr)) return acc;
+    if(!miner||['矿工号','汇总',''].includes(miner)) return acc;
+    if(miner.includes('云算力')) return acc;
+    if(activeMiners&&!activeMiners.has(miner)) return acc;
+    const date=normDate(String(row['登记日期']||'').slice(0,10));
+    if(mode==='today'){if(date!==todayStr) return acc;}
+    else{if(!inRange(date)) return acc;}
 
-    const errs={},details={};
-    const g=k=>row[k]!==undefined?row[k]:'';
+    const e={},d={};
+    const g=k=>{
+      // 历史汇总字段名与场地收益表略有不同，做兼容
+      if(row[k]!==undefined&&row[k]!=='') return row[k];
+      // 历史汇总中部分字段无换行符版本
+      const k2=k.replace(/\n/g,'');
+      return row[k2]!==undefined?row[k2]:'';
+    };
+
+    const isAMIDN=miner.startsWith('AMIDN');
     const nsAct=n(g('NS实际最近24小时算力(P)')||g('ns实际算力'));
-    const pwrR=n(g('预估功耗比（J/T）'));
-    const elecWan=n(g('预估用电量\n（万KWH）')||g('预估用电量（万KWH）'));
-    const normP=n(g('正常价\n（$）')||g('正常价（$）'));
-    const opsFee=n(g('运维费\n（$）')||g('运维费（$）'));
-    const lowP=n(g('最低价\n（$）')||g('最低价（$）'));
-    const normHost=n(g('最近24小时理论托管费($)正常价（含电损）'));
-    const lowHost=n(g('最近24小时理论托管费($)最低价（含电损）'));
-    const opsTotal=n(g('最近24小时理论运维费($)（含电损）'));
-    const normTot=n(g('正常价托管费+运维费'));
-    const lowTot=n(g('最低价托管费+运维费'));
-    const eBtc=n(g('实时每E算力收入（E/BTC）'));
-    const eUsd=n(g('实时每E算力收入（E/USD）'));
+    const nsPct=readPct(g('ns算力占比'))||1;
+    const eBtc=n(g('实时每E算力收入（E/BTC）')||g('每E算力收入（E/BTC）'));
+    const eUsd=n(g('实时每E算力收入（E/USD）')||g('每E算力收入（E/USD）'));
     const btcIn=n(g('预估ns最近24小时btc收入'));
     const usdIn=n(g('最近24小时btc价值（美元）'));
     const gross=n(g('最近24小时理论毛利（美元）'));
-    const effPctRaw=String(g('预估电费占比')||'');
-    const effPct=effPctRaw.includes('%')?n(effPctRaw)/100:n(effPctRaw);
-    const thPwr=n(g('理论功耗比（J/T）'));
-    const thLoss=n(g('理论加线损后功耗比（J/T）'));
-    const moldType=String(g('型号')||'');
-    const profitMode=String(g('利润计算方式')||'');
-    const todayPrice=n(g('今日币价')||g('实时币价')||g('今日币价（USD）'));
+    const price=n(g('今日币价')||g('实时币价'));
 
-    if(eBtc&&eUsd&&todayPrice&&eUsd>0){
-      const calc=eBtc*todayPrice,diff=Math.abs(calc-eUsd)/eUsd;
-      errs.R7=diff<=0.01;details.R7=`${fmtN(eBtc,6)}×${fmtN(todayPrice,0)}=${fmtN(calc,2)}，表中${fmtN(eUsd,2)}`;
+    // R7: E/USD = E/BTC × 币价
+    if(eBtc&&eUsd&&price&&eUsd>0){
+      const c=eBtc*price,df=Math.abs(c-eUsd)/eUsd;
+      e.R7=df<=0.01;d.R7=`${fN(eBtc,6)}×${fN(price,0)}=${fN(c,2)}，表中${fN(eUsd,2)}`;
     }
-    if(nsAct!==null&&pwrR&&elecWan!==null){
-      const calc=nsAct*pwrR*24/10000;
-      const diff=elecWan!==0?Math.abs(calc-elecWan)/Math.abs(elecWan):(calc===0?0:999);
-      errs.R8=diff<=0.01;details.R8=`计算${fmtN(calc,4)}，表中${fmtN(elecWan,4)} 万KWH`;
-    }
-    if(thPwr&&thLoss&&thLoss>0){
-      const coef=moldType.includes('水冷')?1.09:moldType.includes('风冷')?1.05:null;
-      if(coef){const calc=thPwr*coef,diff=Math.abs(calc-thLoss)/thLoss;errs.R9=diff<=0.01;details.R9=`${fmtN(thPwr)}×${coef}=${fmtN(calc)}，表中${fmtN(thLoss)}`;}
-    }
+    // R10: ns BTC收入 = E/BTC × ns实际 / 1000
     if(eBtc&&nsAct!==null&&btcIn!==null&&btcIn!==0){
-      const calc=eBtc*nsAct/1000,diff=Math.abs(calc-btcIn)/Math.abs(btcIn);
-      errs.R10=diff<=0.01;details.R10=`BTC计算${fmtN(calc,6)}，表中${fmtN(btcIn,6)}`;
+      const c=eBtc*nsAct/1000,df=Math.abs(c-btcIn)/Math.abs(btcIn);
+      e.R10=df<=0.01;d.R10=`${fN(eBtc,6)}×${fN(nsAct,2)}/1000=${fN(c,6)}，表中${fN(btcIn,6)}`;
     }
-    if(elecWan!==null&&normP&&normP>0&&normHost!==null){
-      const calc=elecWan*normP*10000,diff=normHost!==0?Math.abs(calc-normHost)/Math.abs(normHost):(calc===0?0:999);
-      errs.R11=diff<=0.01;details.R11=`计算${fmtN(calc,2)}，表中${fmtN(normHost,2)}`;
-    }
-    if(elecWan!==null&&opsFee&&opsFee>0&&opsTotal!==null){
-      const calc=elecWan*opsFee*10000,diff=opsTotal!==0?Math.abs(calc-opsTotal)/Math.abs(opsTotal):(calc===0?0:999);
-      errs.R12=diff<=0.01;details.R12=`计算${fmtN(calc,2)}，表中${fmtN(opsTotal,2)}`;
-    }
+    // R13: 毛利
     if(gross!==null&&usdIn!==null){
-      let calc=null,modeDesc='';
-      if(profitMode.includes('正常价')&&normTot!==null){calc=usdIn-normTot;modeDesc='USD−正常价合计';}
-      else if(profitMode.includes('最低价')&&lowTot!==null){calc=usdIn-lowTot;modeDesc='USD−最低价合计';}
-      else if(profitMode.includes('分润模式1')){calc=usdIn*0.01;modeDesc='USD×1%';}
-      else if(profitMode.includes('分润模式自定义')||profitMode.includes('分润自定义')){calc=usdIn;modeDesc='USD全额';}
-      else if(profitMode.includes('代托')){modeDesc='代托方式跳过';}
-      if(calc!==null){
-        const diff=gross!==0?Math.abs(calc-gross)/Math.abs(gross):(calc===0?0:999);
-        errs.R13=diff<=0.01;details.R13=`[${modeDesc}] 计算${fmtN(calc,2)}，表中${fmtN(gross,2)}`;
+      let c=null,md='';
+      if(isAMIDN){
+        c=usdIn/nsPct;md=`USD/NS占比(${fN(nsPct*100,0)}%)`;
+      } else {
+        const profitMode=String(g('利润计算方式')||'');
+        const normTot=n(g('正常价托管费+运维费'));
+        const lowTot=n(g('最低价托管费+运维费'));
+        if(profitMode.includes('正常价')&&normTot!==null){c=usdIn-normTot;md='USD−正常价合计';}
+        else if(profitMode.includes('最低价')&&lowTot!==null){c=usdIn-lowTot;md='USD−最低价合计';}
+        else if(profitMode.includes('分润模式1')){c=usdIn*0.01;md='USD×1%';}
+        else if(profitMode.includes('分润模式自定义')||profitMode.includes('分润自定义')){c=usdIn;md='USD全额';}
+        else if(profitMode.includes('代托')){md='代托跳过';}
+      }
+      if(c!==null){
+        const df=gross!==0?Math.abs(c-gross)/Math.abs(gross):(c===0?0:999);
+        e.R13=df<=0.01;d.R13=`[${md}] 计算${fN(c,2)}，表中${fN(gross,2)}`;
       }
     }
-    if(normTot!==null&&usdIn&&usdIn>0&&effPct!==null){
-      const calc=normTot/usdIn,diff=Math.abs(calc-effPct);
-      errs.R14=diff<=0.005;details.R14=`计算${fmtPct(calc)}，表中${fmtPct(effPct)}`;
+
+    if(!isAMIDN){
+      const pwrR=n(g('预估功耗比（J/T）'));
+      const elec=n(g('预估用电量\n（万KWH）')||g('预估用电量（万KWH）'));
+      const normP=n(g('正常价\n（$）')||g('正常价（$）'));
+      const opsFee=n(g('运维费\n（$）')||g('运维费（$）'));
+      const normHost=n(g('最近24小时理论托管费($)正常价（含电损）'));
+      const opsTotal=n(g('最近24小时理论运维费($)（含电损）'));
+      const normTot=n(g('正常价托管费+运维费'));
+      const thPwr=n(g('理论功耗比（J/T）'));
+      const thLoss=n(g('理论加线损后功耗比（J/T）'));
+      const mold=String(g('型号')||'');
+
+      // R8: 用电量（2位小数）
+      if(nsAct!==null&&pwrR&&elec!==null){
+        const c=Math.round(nsAct*pwrR*24/10000*100)/100;
+        const el2=Math.round(elec*100)/100;
+        const df=el2!==0?Math.abs(c-el2)/el2:(c===0?0:999);
+        e.R8=df<=0.01;d.R8=`计算${fN(c,2)}，表中${fN(el2,2)} 万KWH`;
+      }
+      // R9: 线损功耗
+      if(thPwr&&thLoss&&thLoss>0){
+        const coef=mold.includes('水冷')?1.09:mold.includes('风冷')?1.05:null;
+        if(coef){const c=thPwr*coef,df=Math.abs(c-thLoss)/thLoss;e.R9=df<=0.01;d.R9=`${fN(thPwr)}×${coef}=${fN(c)}，表中${fN(thLoss)}`;}
+      }
+      // R11: 正常价托管费（2位小数）
+      if(elec!==null&&normP&&normP>0&&normHost!==null){
+        const c=Math.round(elec*normP*10000*100)/100;
+        const nh2=Math.round(normHost*100)/100;
+        const df=nh2!==0?Math.abs(c-nh2)/nh2:(c===0?0:999);
+        e.R11=df<=0.01;d.R11=`计算${fN(c,2)}，表中${fN(nh2,2)}`;
+      }
+      // R12: 运维费（2位小数）
+      if(elec!==null&&opsFee&&opsFee>0&&opsTotal!==null){
+        const c=Math.round(elec*opsFee*10000*100)/100;
+        const ot2=Math.round(opsTotal*100)/100;
+        const df=ot2!==0?Math.abs(c-ot2)/ot2:(c===0?0:999);
+        e.R12=df<=0.01;d.R12=`计算${fN(c,2)}，表中${fN(ot2,2)}`;
+      }
+
+      // R14/R15: 仅场地收益表当天
+      if(mode==='today'){
+        const effPct=readPct(g('预估电费占比'));
+        if(normTot!==null&&usdIn&&usdIn>0&&effPct!==null){
+          const c=normTot/usdIn,df=Math.abs(c-effPct);
+          e.R14=df<=0.005;d.R14=`计算${fP(c)}，表中${fP(effPct)}`;
+        }
+        // R15: 关机币价 = 预估电费成本($) ÷ 预估ns BTC产出(BTC)
+        // 电费成本 = 用电量(万KWH)×10000×实际电价；按最低价计算取最低价，其余取正常价；均加运维费
+        const shutPrice=n(g('关机币价（USD）根据利润计算方式自动更新'));
+        const opsFeeR15=n(g('运维费\n（$）')||g('运维费（$）'));
+        const lowPR15=n(g('最低价\n（$）')||g('最低价（$）'));
+        const btcInR15=n(g('预估ns最近24小时btc收入'));
+        if(elec!==null&&btcInR15&&btcInR15>0&&shutPrice&&shutPrice>0){
+          const profitM15=String(g('利润计算方式')||'');
+          const baseP15=profitM15.includes('最低价')&&!profitM15.includes('正常价')&&lowPR15&&lowPR15>0?lowPR15:normP;
+          if(baseP15){
+            const totalP15=(baseP15||0)+(opsFeeR15||0);
+            const cost15=elec*10000*totalP15;
+            const calcShut=cost15/btcInR15;
+            const df=Math.abs(calcShut-shutPrice)/shutPrice;
+            e.R15=df<=0.01;d.R15=`电费${fN(cost15,2)}÷BTC${fN(btcInR15,6)}=${fN(calcShut,2)}，表中${fN(shutPrice,2)}`;
+          }
+        }
+      }
     }
 
-    const errKeys=Object.keys(errs).filter(k=>!errs[k]);
-    acc.push({miner,date:dateStr,site:String(g('场地编号')||''),profitMode,errs,details,errKeys,totalChecks:Object.keys(errs).length});
+    const errKeys=Object.keys(e).filter(k=>!e[k]);
+    const profitMode=String(g('利润计算方式')||'');
+    acc.push({miner,date,site:String(g('场地编号')||''),profitMode,isAMIDN,e,d,errKeys,total:Object.keys(e).length});
     return acc;
   },[]);
 }
 
 // ── 主流程 ──
 function runCheck(){
-  if(!workbook){setStatus('请先上传文件');return;}
-  const s1=$('selSheet1').value,s2=$('selSheet2').value;
-  const from=$('dateFrom').value,to=$('dateTo').value;
-  setStatus('校验中...');
+  if(!wb){setSt('请先上传文件');return;}
+  const s1=$('selS1').value,s2=$('selS2').value,s3=$('selS3').value;
+  setSt('校验中...');
   try{
-    if(!workbook.Sheets[s1]) throw new Error(`找不到 Sheet「${s1}」`);
-    if(!workbook.Sheets[s2]) throw new Error(`找不到 Sheet「${s2}」`);
-    const ins=validateInspection(sheetToRows(workbook,s1));
-    const rev=validateRevenue(sheetToRows(workbook,s2));
-    const dateLabel=from||to?`${from||'起始'}～${to||'最新'}`:'全部日期';
-    lastReport={ins,rev,dateLabel,fileName:$('fileName').textContent,from,to};
-    saveHistory(lastReport);
-    renderReport(lastReport);
+    if(!wb.Sheets[s1]) throw new Error(`找不到 Sheet「${s1}」`);
+    if(!wb.Sheets[s2]) throw new Error(`找不到 Sheet「${s2}」`);
+    const insRows=toRows(wb.Sheets[s1]);
+    const activeMiners=buildActiveMiners(insRows);
+    const ins=valIns(insRows);
+    const rev=valRevCore(toRows(wb.Sheets[s2]),activeMiners,'today');
+    const hist=s3&&wb.Sheets[s3]?valRevCore(toRows(wb.Sheets[s3]),activeMiners,'hist'):[];
+    const from=$('dateFrom').value,to=$('dateTo').value;
+    const dl=from||to?`${from||'起始'} ～ ${to||'最新'}`:'全部日期';
+    lastRpt={ins,rev,hist,dl,fn:$('fileName').textContent};
+    saveHist(lastRpt);
+    renderRpt(lastRpt);
     $('btnExport').style.display='inline-block';
-    setStatus(`校验完成：巡查表 ${ins.length} 条，收益表 ${rev.length} 条（${dateLabel}）`);
-  }catch(ex){setStatus('错误：'+ex.message);}
+    setSt(`完成：巡查表 ${ins.length}，收益当天 ${rev.length}，历史汇总 ${hist.length} 条`);
+  }catch(ex){setSt('错误：'+ex.message);}
 }
 
-// ── 渲染 ──
-function renderReport(rpt){
-  const{ins,rev,dateLabel}=rpt;
-  const all=[...ins,...rev];
-  const totalChecks=all.reduce((s,r)=>s+r.totalChecks,0);
-  const totalErrs=all.reduce((s,r)=>s+r.errKeys.length,0);
-  const errRows=all.filter(r=>r.errKeys.length>0).length;
-  const passRate=totalChecks>0?((totalChecks-totalErrs)/totalChecks*100):100;
-  const clrClass=v=>v>=95?'green':v>=80?'amber':'red';
-  const clrHex=v=>v>=95?'#3b6d11':v>=80?'#ba7517':'#a32d2d';
+// ── 渲染报告 ──
+function renderRpt(rpt){
+  const{ins,rev,hist=[],dl}=rpt;
+  const all=[...ins,...rev,...hist];
+  const tc=all.reduce((s,r)=>s+r.total,0);
+  const te=all.reduce((s,r)=>s+r.errKeys.length,0);
+  const er=all.filter(r=>r.errKeys.length>0).length;
+  const pr=tc>0?((tc-te)/tc*100):100;
+  const cc=v=>v>=95?'green':v>=80?'amber':'red';
+  const ch=v=>v>=95?'#3b6d11':v>=80?'#ba7517':'#a32d2d';
 
-  const siteMap={};
-  all.forEach(r=>{if(!siteMap[r.site])siteMap[r.site]={site:r.site,total:0,errs:0};siteMap[r.site].total++;if(r.errKeys.length>0)siteMap[r.site].errs++;});
+  const sm={};
+  all.forEach(r=>{if(!sm[r.site])sm[r.site]={s:r.site,t:0,e:0};sm[r.site].t++;if(r.errKeys.length>0)sm[r.site].e++;});
+
+  // 按规则分组异常
+  const byRule={};
+  all.forEach(r=>{r.errKeys.forEach(k=>{if(!byRule[k])byRule[k]=[];byRule[k].push({miner:r.miner,site:r.site,date:r.date,detail:r.d[k]||''});});});
 
   let h=`<div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div style="font-size:14px;font-weight:500">校验报告
-        <span class="date-filter-summary">${dateLabel}</span>
-      </div>
+    <div style="display:flex;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <span style="font-size:14px;font-weight:500">校验报告</span>
+      <span class="date-pill">${dl}</span>
     </div>
-    <div class="metric-grid">
-      <div class="metric"><div class="metric-label">检查矿工号</div><div class="metric-val">${all.length}</div></div>
-      <div class="metric"><div class="metric-label">校验项总数</div><div class="metric-val">${totalChecks}</div></div>
-      <div class="metric ${totalErrs>0?'red':'green'}"><div class="metric-label">异常项数</div><div class="metric-val">${totalErrs}</div></div>
-      <div class="metric ${clrClass(passRate)}"><div class="metric-label">通过率</div><div class="metric-val">${passRate.toFixed(1)}%</div></div>
-      <div class="metric ${errRows>0?'amber':'green'}"><div class="metric-label">异常矿工号</div><div class="metric-val">${errRows}</div></div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-lbl">检查矿工号</div><div class="metric-val">${all.length}</div></div>
+      <div class="metric"><div class="metric-lbl">校验项总数</div><div class="metric-val">${tc}</div></div>
+      <div class="metric ${te>0?'red':'green'}"><div class="metric-lbl">异常项数</div><div class="metric-val">${te}</div></div>
+      <div class="metric ${cc(pr)}"><div class="metric-lbl">通过率</div><div class="metric-val">${pr.toFixed(1)}%</div></div>
+      <div class="metric ${er>0?'amber':'green'}"><div class="metric-lbl">异常矿工号</div><div class="metric-val">${er}</div></div>
     </div>
   </div>`;
 
-  // 场地概览
-  h+=`<div class="card"><div class="card-title">场地通过概览</div><div class="tbl-wrap"><table>
-    <thead><tr><th>场地</th><th>检查数</th><th>异常数</th><th style="min-width:160px">通过率</th><th>状态</th></tr></thead><tbody>`;
-  Object.values(siteMap).forEach(s=>{
-    const r=((s.total-s.errs)/s.total*100);
-    h+=`<tr><td style="font-weight:500">${s.site||'—'}</td><td>${s.total}</td><td>${s.errs}</td>
-      <td><div class="prog-wrap"><div class="prog"><div class="prog-bar" style="width:${r}%;background:${clrHex(r)}"></div></div><span style="font-size:11px;min-width:36px">${r.toFixed(0)}%</span></div></td>
-      <td><span class="badge ${s.errs===0?'ok':'err'}">${s.errs===0?'正常':'有异常'}</span></td></tr>`;
+  // 场地概览（折叠）
+  const siteErrCount=Object.values(sm).filter(s=>s.e>0).length;
+  h+=`<div class="collapse-card">
+    <div class="collapse-head" onclick="togCollapse('col-site')">
+      <div class="collapse-title">场地概览
+        <span class="badge ${siteErrCount>0?'err':'ok'}" style="font-size:10px">${siteErrCount>0?siteErrCount+'个场地异常':'全部正常'}</span>
+      </div>
+      <span class="collapse-arr" id="col-site-arr">▼</span>
+    </div>
+    <div class="collapse-body" id="col-site">
+      <div class="tbl-wrap"><table>
+      <thead><tr><th>场地</th><th>检查数</th><th>异常数</th><th style="min-width:130px">通过率</th><th>状态</th></tr></thead><tbody>`;
+  Object.values(sm).forEach(s=>{
+    const r=((s.t-s.e)/s.t*100);
+    h+=`<tr><td style="font-weight:500">${s.s||'—'}</td><td>${s.t}</td><td>${s.e}</td>
+      <td><div class="prog-wrap"><div class="prog"><div class="prog-bar" style="width:${r}%;background:${ch(r)}"></div></div><span style="font-size:11px;min-width:32px">${r.toFixed(0)}%</span></div></td>
+      <td><span class="badge ${s.e===0?'ok':'err'}">${s.e===0?'正常':'有异常'}</span></td></tr>`;
   });
-  h+=`</tbody></table></div></div>`;
+  h+=`</tbody></table></div></div></div>`;
 
-  // 异常明细
-  const errList=all.filter(r=>r.errKeys.length>0);
-  if(errList.length>0){
-    h+=`<div class="card"><div class="card-title">异常明细（${errList.length} 个矿工号）</div><div class="tbl-wrap"><table>
-      <thead><tr><th>矿工号</th><th>场地</th><th>日期</th><th>来源</th><th>异常规则</th><th style="min-width:220px">说明</th></tr></thead><tbody>`;
-    errList.forEach(r=>{
-      const src=r.totalChecks<=6?'巡查表':'收益表';
-      h+=`<tr><td style="font-weight:500">${r.miner}</td><td>${r.site}</td><td>${r.date}</td>
-        <td style="color:var(--text2)">${src}</td>
-        <td>${r.errKeys.map(k=>`<span class="tag">${RULES[k]?.label||k}</span>`).join('')}</td>
-        <td style="font-size:11px;color:var(--text2)">${r.errKeys.map(k=>`<div><b>${RULES[k]?.label}：</b>${r.details[k]||''}</div>`).join('')}</td></tr>`;
+  // 异常分类（折叠）
+  const ruleOrder=['R1','R2','R3','R4','R5','R7','R8','R9','R10','R11','R12','R13','R14','R15'];
+  const hasErr=ruleOrder.some(k=>byRule[k]&&byRule[k].length>0);
+  if(hasErr){
+    h+=`<div class="card"><div class="card-title">异常明细（按规则分类，点击展开）</div>`;
+    ruleOrder.forEach(k=>{
+      if(!byRule[k]||!byRule[k].length) return;
+      const items=byRule[k],rid=`acc-${k}`;
+      h+=`<div class="acc-group">
+        <div class="acc-head" onclick="togAcc('${rid}')">
+          <div class="acc-left">
+            <span class="acc-rid">${k}</span>
+            <span class="acc-name">${RULES[k]?.label||k}</span>
+            <span class="acc-src">${RULES[k]?.src||''}</span>
+          </div>
+          <span class="acc-cnt">${items.length} 条</span>
+          <span class="acc-arr" id="${rid}-arr">▼</span>
+        </div>
+        <div class="acc-body" id="${rid}">`;
+      items.forEach(it=>{
+        h+=`<div class="acc-row">
+          <span class="acc-miner">${it.miner}</span>
+          <span class="acc-site">${it.site}</span>
+          <span class="acc-date">${it.date}</span>
+          <span class="acc-detail">${it.detail}</span>
+        </div>`;
+      });
+      h+=`</div></div>`;
     });
-    h+=`</tbody></table></div></div>`;
+    h+=`</div>`;
   }
 
-  // 全量明细
-  h+=`<div class="card"><div class="card-title">全量明细</div>
+  // 全量明细（折叠，默认收起）
+  h+=`<div class="collapse-card">
+    <div class="collapse-head" onclick="togCollapse('col-detail')">
+      <div class="collapse-title">全量明细
+        <span style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">巡查表${ins.length}条 · 收益当天${rev.length}条${hist.length>0?' · 历史'+hist.length+'条':''}</span>
+      </div>
+      <span class="collapse-arr" id="col-detail-arr">▼</span>
+    </div>
+    <div class="collapse-body" id="col-detail" style="padding:0">
+    <div style="padding:0 18px;border-bottom:.5px solid var(--border)">
     <div class="tabs">
-      <button class="tab active" onclick="swTab(this,'dt-ins')">每日巡查表 (${ins.length})</button>
-      <button class="tab" onclick="swTab(this,'dt-rev')">场地收益表 (${rev.length})</button>
+      <button class="tab active" onclick="swTab(this,'ti')">巡查表 (${ins.length})</button>
+      <button class="tab" onclick="swTab(this,'tr')">收益当天 (${rev.length})</button>
+      ${hist.length>0?`<button class="tab" onclick="swTab(this,'th')">历史汇总 (${hist.length})</button>`:''}
     </div>`;
 
-  const iR=['R1','R2','R3','R4','R5','R6'];
-  h+=`<div id="dt-ins" class="tbl-wrap"><table><thead><tr><th>矿工号</th><th>场地</th><th>日期</th>`;
-  iR.forEach(k=>h+=`<th title="${RULES[k]?.label}">${RULES[k]?.label}</th>`);
+  // 巡查表明细
+  const iR=['R1','R2','R3','R4','R5'];
+  h+=`<div id="ti" class="tbl-wrap"><table><thead><tr><th>矿工号</th><th>场地</th><th>日期</th>`;
+  iR.forEach(k=>h+=`<th title="${RULES[k]?.label}">${RULES[k]?.label||k}</th>`);
   h+=`<th>状态</th></tr></thead><tbody>`;
   ins.forEach(r=>{
     h+=`<tr><td style="font-weight:500">${r.miner}</td><td>${r.site}</td><td>${r.date}</td>`;
     iR.forEach(k=>{
-      if(r.errs[k]===undefined){h+=`<td style="color:var(--text3)">—</td>`;return;}
-      h+=`<td title="${r.details[k]||''}"><span class="badge ${r.errs[k]?'ok':'err'}">${r.errs[k]?'✓':'✗'}</span></td>`;
+      if(r.e[k]===undefined){h+=`<td style="color:var(--text3)">—</td>`;return;}
+      h+=`<td title="${r.d[k]||''}"><span class="badge ${r.e[k]?'ok':'err'}">${r.e[k]?'✓':'✗'}</span></td>`;
     });
-    h+=`<td><span class="badge ${r.errKeys.length===0?'ok':'err'}">${r.errKeys.length===0?'通过':r.errKeys.length+'项异常'}</span></td></tr>`;
+    h+=`<td><span class="badge ${r.errKeys.length===0?'ok':'err'}">${r.errKeys.length===0?'通过':r.errKeys.length+'项'}</span></td></tr>`;
   });
   h+=`</tbody></table></div>`;
 
-  const rR=['R7','R8','R9','R10','R11','R12','R13','R14'];
-  h+=`<div id="dt-rev" style="display:none" class="tbl-wrap"><table><thead><tr><th>矿工号</th><th>场地</th><th>日期</th><th>利润模式</th>`;
-  rR.forEach(k=>h+=`<th title="${RULES[k]?.label}">${RULES[k]?.label}</th>`);
+  // 收益表明细（当天）
+  const rR=['R7','R8','R9','R10','R11','R12','R13','R14','R15'];
+  h+=`<div id="tr" style="display:none" class="tbl-wrap"><table><thead><tr><th>矿工号</th><th>场地</th><th>日期</th><th>利润模式</th>`;
+  rR.forEach(k=>h+=`<th title="${RULES[k]?.label}">${RULES[k]?.label||k}</th>`);
   h+=`<th>状态</th></tr></thead><tbody>`;
   rev.forEach(r=>{
-    h+=`<tr><td style="font-weight:500">${r.miner}</td><td>${r.site}</td><td>${r.date}</td><td style="font-size:11px;color:var(--text2)">${r.profitMode||'—'}</td>`;
+    h+=`<tr><td style="font-weight:500">${r.miner}</td><td>${r.site}</td><td>${r.date}</td><td style="font-size:11px;color:var(--text2)">${r.profitMode||'—'}${r.isAMIDN?' (仅收益)':''}</td>`;
     rR.forEach(k=>{
-      if(r.errs[k]===undefined){h+=`<td style="color:var(--text3)">—</td>`;return;}
-      h+=`<td title="${r.details[k]||''}"><span class="badge ${r.errs[k]?'ok':'err'}">${r.errs[k]?'✓':'✗'}</span></td>`;
+      if(r.e[k]===undefined){h+=`<td style="color:var(--text3)">—</td>`;return;}
+      h+=`<td title="${r.d[k]||''}"><span class="badge ${r.e[k]?'ok':'err'}">${r.e[k]?'✓':'✗'}</span></td>`;
     });
-    h+=`<td><span class="badge ${r.errKeys.length===0?'ok':'err'}">${r.errKeys.length===0?'通过':r.errKeys.length+'项异常'}</span></td></tr>`;
+    h+=`<td><span class="badge ${r.errKeys.length===0?'ok':'err'}">${r.errKeys.length===0?'通过':r.errKeys.length+'项'}</span></td></tr>`;
   });
-  h+=`</tbody></table></div></div>`;
+  h+=`</tbody></table></div>`;
 
+  // 历史汇总明细
+  if(hist.length>0){
+    const hR=['R7','R8','R9','R10','R11','R12','R13'];
+    h+=`<div id="th" style="display:none" class="tbl-wrap"><table><thead><tr><th>矿工号</th><th>场地</th><th>日期</th><th>利润模式</th>`;
+    hR.forEach(k=>h+=`<th title="${RULES[k]?.label}">${RULES[k]?.label||k}</th>`);
+    h+=`<th>状态</th></tr></thead><tbody>`;
+    hist.forEach(r=>{
+      h+=`<tr><td style="font-weight:500">${r.miner}</td><td>${r.site}</td><td>${r.date}</td><td style="font-size:11px;color:var(--text2)">${r.profitMode||'—'}${r.isAMIDN?' (仅收益)':''}</td>`;
+      hR.forEach(k=>{
+        if(r.e[k]===undefined){h+=`<td style="color:var(--text3)">—</td>`;return;}
+        h+=`<td title="${r.d[k]||''}"><span class="badge ${r.e[k]?'ok':'err'}">${r.e[k]?'✓':'✗'}</span></td>`;
+      });
+      h+=`<td><span class="badge ${r.errKeys.length===0?'ok':'err'}">${r.errKeys.length===0?'通过':r.errKeys.length+'项'}</span></td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  }
+  h+=`</div></div></div>`;
   $('reportArea').innerHTML=h;
 }
 
+function togAcc(id){const b=$(id),a=$(`${id}-arr`);const o=b.classList.toggle('open');a.classList.toggle('open',o);}
+function togCollapse(id){const b=$(id),a=$(`${id}-arr`);const o=b.classList.toggle('open');a.classList.toggle('open',o);}
 function swTab(el,id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  $('dt-ins').style.display=id==='dt-ins'?'':'none';
-  $('dt-rev').style.display=id==='dt-rev'?'':'none';
+  ['ti','tr','th'].forEach(t=>{const el=$(t);if(el)el.style.display=t===id?'':'none';});
 }
 
-// ── 导出Excel ──
+// ── 导出 Excel ──
 function exportExcel(){
-  if(!lastReport){alert('请先生成报告');return;}
-  const{ins,rev,dateLabel,fileName}=lastReport;
-  const all=[...ins,...rev];
-  const totalChecks=all.reduce((s,r)=>s+r.totalChecks,0);
-  const totalErrs=all.reduce((s,r)=>s+r.errKeys.length,0);
-  const wb=XLSX.utils.book_new();
+  if(!lastRpt){alert('请先生成报告');return;}
+  const{ins,rev,hist=[],dl,fn}=lastRpt;
+  const all=[...ins,...rev,...hist];
+  const tc=all.reduce((s,r)=>s+r.total,0),te=all.reduce((s,r)=>s+r.errKeys.length,0);
+  const ewb=XLSX.utils.book_new();
 
-  const s1=[['矿场数据校验报告'],['时间范围',dateLabel],['源文件',fileName||'—'],
-    ['生成时间',new Date().toLocaleString('zh-CN')],[],['指标','数值'],
-    ['检查矿工号数',all.length],['校验项总数',totalChecks],['异常项数',totalErrs],
-    ['通过率',`${((totalChecks-totalErrs)/totalChecks*100).toFixed(1)}%`],
-    ['异常矿工号数',all.filter(r=>r.errKeys.length>0).length]];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(s1),'报告摘要');
+  XLSX.utils.book_append_sheet(ewb,XLSX.utils.aoa_to_sheet([
+    ['矿场数据校验报告'],['时间范围',dl],['源文件',fn||'—'],
+    ['生成时间',new Date().toLocaleString('zh-CN')],[],
+    ['指标','数值'],['检查矿工号数',all.length],['校验项总数',tc],['异常项数',te],
+    ['通过率',`${tc>0?((tc-te)/tc*100).toFixed(1):100}%`],
+    ['异常矿工号数',all.filter(r=>r.errKeys.length>0).length]
+  ]),'报告摘要');
 
-  const h2=['矿工号','场地','日期','架上守恒','总和24h','实时算力','架上理论','有效率','故障预警','异常规则','说明'];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([h2,...ins.map(r=>[r.miner,r.site,r.date,
-    ...['R1','R2','R3','R4','R5','R6'].map(k=>r.errs[k]!==undefined?(r.errs[k]?'✓':'✗'):'—'),
-    r.errKeys.map(k=>RULES[k]?.label||k).join(' | '),
-    r.errKeys.map(k=>r.details[k]||'').join(' | ')])]),'每日巡查表校验');
+  XLSX.utils.book_append_sheet(ewb,XLSX.utils.aoa_to_sheet([
+    ['矿工号','场地','日期','架上守恒','总和24h','实时算力','架上理论','有效率','异常规则','说明'],
+    ...ins.map(r=>[r.miner,r.site,r.date,
+      ...['R1','R2','R3','R4','R5'].map(k=>r.e[k]!==undefined?(r.e[k]?'✓':'✗'):'—'),
+      r.errKeys.map(k=>RULES[k]?.label||k).join('|'),
+      r.errKeys.map(k=>r.d[k]||'').join('|')])
+  ]),'每日巡查表');
 
-  const h3=['矿工号','场地','日期','利润模式','E/USD换算','用电量','线损功耗','ns收入','正常价托管','运维费','毛利','电费占比','异常规则','说明'];
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([h3,...rev.map(r=>[r.miner,r.site,r.date,r.profitMode||'—',
-    ...['R7','R8','R9','R10','R11','R12','R13','R14'].map(k=>r.errs[k]!==undefined?(r.errs[k]?'✓':'✗'):'—'),
-    r.errKeys.map(k=>RULES[k]?.label||k).join(' | '),
-    r.errKeys.map(k=>r.details[k]||'').join(' | ')])]),'场地收益表校验');
+  XLSX.utils.book_append_sheet(ewb,XLSX.utils.aoa_to_sheet([
+    ['矿工号','场地','日期','利润模式','E/USD','用电量','线损','ns收入','托管费','运维费','毛利','电费占比','关机币价','异常规则','说明'],
+    ...rev.map(r=>[r.miner,r.site,r.date,r.profitMode||'—'+(r.isAMIDN?' (仅收益)':''),
+      ...['R7','R8','R9','R10','R11','R12','R13','R14','R15'].map(k=>r.e[k]!==undefined?(r.e[k]?'✓':'✗'):'—'),
+      r.errKeys.map(k=>RULES[k]?.label||k).join('|'),
+      r.errKeys.map(k=>r.d[k]||'').join('|')])
+  ]),'场地收益表(当天)');
 
-  const errOnly=all.filter(r=>r.errKeys.length>0);
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([
-    ['矿工号','场地','日期','来源表','异常规则','说明'],
-    ...errOnly.map(r=>[r.miner,r.site,r.date,r.totalChecks<=6?'每日巡查表':'场地收益表',
-      r.errKeys.map(k=>RULES[k]?.label||k).join(' | '),
-      r.errKeys.map(k=>r.details[k]||'').join(' | ')])
-  ]),'异常明细');
+  if(hist.length>0){
+    XLSX.utils.book_append_sheet(ewb,XLSX.utils.aoa_to_sheet([
+      ['矿工号','场地','日期','利润模式','E/USD','用电量','线损','ns收入','托管费','运维费','毛利','异常规则','说明'],
+      ...hist.map(r=>[r.miner,r.site,r.date,r.profitMode||'—'+(r.isAMIDN?' (仅收益)':''),
+        ...['R7','R8','R9','R10','R11','R12','R13'].map(k=>r.e[k]!==undefined?(r.e[k]?'✓':'✗'):'—'),
+        r.errKeys.map(k=>RULES[k]?.label||k).join('|'),
+        r.errKeys.map(k=>r.d[k]||'').join('|')])
+    ]),'收益历史汇总');
+  }
 
-  XLSX.writeFile(wb,`矿场校验报告_${dateLabel.replace(/[～\s]/g,'_')}.xlsx`);
+  XLSX.utils.book_append_sheet(ewb,XLSX.utils.aoa_to_sheet([
+    ['规则','规则名称','来源','条数','矿工号','场地','日期','说明'],
+    ...Object.entries(RULES).flatMap(([k,v])=>{
+      const items=all.filter(r=>r.errKeys.includes(k));
+      return items.map((r,i)=>[i===0?k:'',i===0?v.label:'',i===0?v.src:'',i===0?items.length:'',r.miner,r.site,r.date,r.d[k]||'']);
+    })
+  ]),'异常汇总');
+
+  XLSX.writeFile(ewb,`矿场校验报告_${dl.replace(/[～\s]/g,'_')}.xlsx`);
 }
 
 // ── 历史记录 ──
-const HIST_KEY='mining_v2_history';
-function loadHistArr(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch{return[];}}
-function saveHistory(rpt){
-  const arr=loadHistArr();
-  const all=[...rpt.ins,...rpt.rev];
-  const totalChecks=all.reduce((s,r)=>s+r.totalChecks,0);
-  const totalErrs=all.reduce((s,r)=>s+r.errKeys.length,0);
-  arr.unshift({id:Date.now(),dateLabel:rpt.dateLabel,fileName:rpt.fileName,
-    totalChecks,totalErrs,errRows:all.filter(r=>r.errKeys.length>0).length,
-    passRate:totalChecks>0?((totalChecks-totalErrs)/totalChecks*100):100,
-    savedAt:new Date().toLocaleString('zh-CN'),snapshot:rpt});
-  localStorage.setItem(HIST_KEY,JSON.stringify(arr.slice(0,30)));
+const HK='mining_v4_hist';
+function loadH(){try{return JSON.parse(localStorage.getItem(HK)||'[]');}catch{return[];}}
+function saveHist(rpt){
+  try{
+    const arr=loadH();
+    const all=[...rpt.ins,...rpt.rev,...(rpt.hist||[])];
+    const tc=all.reduce((s,r)=>s+r.total,0),te=all.reduce((s,r)=>s+r.errKeys.length,0);
+    // 只存摘要，不存完整数据（避免超出localStorage配额）
+    const errDetails=all.filter(r=>r.errKeys.length>0).map(r=>({
+      miner:r.miner,site:r.site,date:r.date,
+      errKeys:r.errKeys,
+      details:Object.fromEntries(r.errKeys.map(k=>[k,r.d[k]||'']))
+    }));
+    arr.unshift({id:Date.now(),dl:rpt.dl,fn:rpt.fn,tc,te,
+      er:errDetails.length,
+      pr:tc>0?((tc-te)/tc*100):100,
+      at:new Date().toLocaleString('zh-CN'),
+      errDetails});
+    // 最多保留20条，超出时裁剪
+    const trimmed=arr.slice(0,20);
+    try{
+      localStorage.setItem(HK,JSON.stringify(trimmed));
+    }catch(e){
+      // 仍然超出：只保留5条
+      localStorage.setItem(HK,JSON.stringify(trimmed.slice(0,5)));
+    }
+  }catch(e){console.warn('历史记录保存失败:',e);}
 }
-function renderHistory(){
-  const arr=loadHistArr();
-  const el=$('histList');
-  if(!arr.length){el.innerHTML='<div class="empty">暂无历史记录<br>每次校验后自动保存在此</div>';return;}
+function renderHist(){
+  const arr=loadH(),el=$('histList');
+  if(!arr.length){el.innerHTML='<div class="empty">暂无历史记录<br>每次校验后自动保存</div>';return;}
   el.innerHTML=arr.map((h,i)=>{
-    const c=h.passRate>=95?'var(--green)':h.passRate>=80?'var(--amber)':'var(--red)';
+    const c=h.pr>=95?'var(--green)':h.pr>=80?'var(--amber)':'var(--red)';
     return `<div class="hist-item">
-      <div><div class="hist-date">${h.dateLabel||'—'}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${h.savedAt}</div></div>
-      <div class="hist-meta">${h.fileName||'—'} · ${h.totalChecks}项校验 · ${h.errRows}个异常矿工号</div>
-      <div class="hist-rate" style="color:${c}">${h.passRate.toFixed(1)}%</div>
-      <div class="hist-actions">
-        <button class="btn btn-sm" onclick="restoreRpt(${i})">查看</button>
-        <button class="btn btn-sm" onclick="delHist(${i})">删除</button>
+      <div><div class="hist-date">${h.dl||'—'}</div><div style="font-size:10px;color:var(--text3);margin-top:1px">${h.at}</div></div>
+      <div class="hist-meta">${h.fn||'—'} · ${h.tc}项校验 · <span style="color:${h.er>0?'var(--red)':'var(--green)'}">异常${h.er}个</span></div>
+      <div class="hist-rate" style="color:${c}">${h.pr.toFixed(1)}%</div>
+      <div class="hist-acts">
+        <button class="btn btn-sm" onclick="restH(${i})">查看</button>
+        <button class="btn btn-sm" onclick="delH(${i})">删除</button>
       </div>
     </div>`;
   }).join('');
 }
-function restoreRpt(i){
-  const arr=loadHistArr();lastReport=arr[i].snapshot;
-  renderReport(lastReport);showPage('check',document.querySelector('.nav-tab'));
-  $('btnExport').style.display='inline-block';
+function restH(i){
+  const arr=loadH();
+  const h=arr[i];
+  if(!h.errDetails){alert('该记录为旧格式，无法恢复详情');return;}
+  // 展示历史摘要报告（仅异常条目）
+  const fakeRpt={
+    ins:h.errDetails.filter(r=>RULES[r.errKeys[0]]?.src==='巡查表'||r.errKeys.some(k=>['R1','R2','R3','R4','R5'].includes(k))),
+    rev:h.errDetails.filter(r=>r.errKeys.some(k=>['R7','R8','R9','R10','R11','R12','R13','R14','R15'].includes(k))),
+    hist:[],dl:h.dl+'（历史摘要）',fn:h.fn
+  };
+  // 补齐字段
+  [...fakeRpt.ins,...fakeRpt.rev].forEach(r=>{
+    r.e=Object.fromEntries(r.errKeys.map(k=>[k,false]));
+    r.d=r.details||{};
+    r.total=r.errKeys.length;
+    r.profitMode='';r.isAMIDN=false;r.site=r.site||'';
+  });
+  lastRpt=fakeRpt;
+  renderRpt(lastRpt);
+  showPage('check',document.querySelector('.nav-tab'));
+  setSt('历史摘要（仅显示异常条目）');
 }
-function delHist(i){
-  const arr=loadHistArr();arr.splice(i,1);
-  localStorage.setItem(HIST_KEY,JSON.stringify(arr));renderHistory();
-}
+function delH(i){const arr=loadH();arr.splice(i,1);localStorage.setItem(HK,JSON.stringify(arr));renderHist();}
 
 // ── 页面切换 ──
 function showPage(name,el){
@@ -644,30 +856,10 @@ function showPage(name,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   $(`page-${name}`).classList.add('active');
   if(el)el.classList.add('active');
-  if(name==='history')renderHistory();
+  if(name==='history')renderHist();
 }
 
-// ── 演示数据 ──
-function loadDemo(){
-  const ins=[
-    {miner:'AMETH01',date:'2026-06-22',site:'ETH01',errs:{R1:true,R2:true,R3:true,R4:true,R5:true,R6:true},details:{R1:'1355−10=1345，表中1345',R2:'237.5+0=237.5，表中237.5',R3:'154.9+0=154.9，表中154.9',R4:'计算429.76，表中429.76',R5:'计算55.26%，表中55.26%，差0.00%',R6:'故障数=10'},errKeys:[],totalChecks:6},
-    {miner:'AMETH02',date:'2026-06-22',site:'ETH01',errs:{R1:true,R2:true,R3:true,R4:true,R5:true,R6:true},details:{R1:'267−4=263，表中263',R2:'67.0+0=67.0，表中67.0',R3:'61.3+0=61.3，表中61.3',R4:'计算83.90，表中83.90',R5:'计算79.86%，表中79.86%，差0.00%',R6:'故障数=4'},errKeys:[],totalChecks:6},
-    {miner:'AMOM05',date:'2026-06-22',site:'OM01',errs:{R1:true,R2:true,R3:true,R4:true,R5:false,R6:true},details:{R1:'454−2=452，表中452',R2:'218.0+0=218.0，表中218.0',R3:'218.5+0=218.5，表中218.5',R4:'计算213.80，表中213.80',R5:'计算102.06%，表中101.97%，差0.09%（超容差）',R6:'故障数=2'},errKeys:['R5'],totalChecks:6},
-    {miner:'AMETH01',date:'2026-06-23',site:'ETH01',errs:{R1:true,R2:true,R3:true,R4:true,R5:true,R6:true},details:{R1:'1355−9=1346，表中1346',R2:'242.8+0=242.8，表中242.8',R3:'154.9+0=154.9，表中154.9',R4:'计算430.08，表中430.08',R5:'计算56.45%，表中56.45%，差0.00%',R6:'故障数=9'},errKeys:[],totalChecks:6},
-    {miner:'AMOM04',date:'2026-06-23',site:'OM01',errs:{R1:true,R2:true,R3:true,R4:true,R5:true,R6:false},details:{R1:'2016−6=2010，表中2010',R2:'773.1+0=773.1，表中773.1',R3:'788.3+0=788.3，表中788.3',R4:'计算719.58，表中719.58',R5:'计算107.44%，表中107.44%，差0.00%',R6:'故障数为空，需填报'},errKeys:['R6'],totalChecks:6},
-  ];
-  const rev=[
-    {miner:'AMETH01',date:'2026-06-22',site:'ETH01',profitMode:'按正常价计算',errs:{R7:true,R8:true,R9:true,R10:true,R11:true,R12:true,R13:true,R14:true},details:{R7:'通过',R8:'计算10.163，表中10.163万KWH',R9:'16×1.09=17.44，表中17.44',R10:'通过',R11:'通过',R12:'通过',R13:'[USD−正常价合计] 通过',R14:'通过'},errKeys:[],totalChecks:8},
-    {miner:'AMOM05',date:'2026-06-22',site:'OM01',profitMode:'按正常价计算',errs:{R7:true,R8:true,R9:true,R10:true,R11:true,R12:true,R13:true,R14:true},details:{R7:'通过',R8:'通过',R9:'通过',R10:'通过',R11:'通过',R12:'通过',R13:'[USD−正常价合计] 通过',R14:'通过'},errKeys:[],totalChecks:8},
-    {miner:'AMIDN02',date:'2026-06-23',site:'IDN01',profitMode:'按分润模式自定义计算',errs:{R7:true,R8:true,R9:true,R10:false,R11:false,R12:false,R13:true,R14:false},details:{R7:'通过',R8:'通过',R9:'通过',R10:'BTC计算0.0122，表中0.0001，差10倍（单位混用）',R11:'计算0，表中587.3',R12:'计算0，表中42.1',R13:'[USD全额] 通过',R14:'计算N/A，表中83.5%'},errKeys:['R10','R11','R12','R14'],totalChecks:8},
-  ];
-  lastReport={ins,rev,dateLabel:'2026-06-22 ～ 2026-06-23（演示）',fileName:'演示数据.xlsx'};
-  saveHistory(lastReport);renderReport(lastReport);
-  $('btnExport').style.display='inline-block';
-  setStatus('已载入演示数据（2天范围示例）');
-}
-
-function setStatus(msg){$('statusMsg').textContent=msg;}
+function setSt(m){$('statusMsg').textContent=m;}
 </script>
 </body>
 </html>
